@@ -1,26 +1,52 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  OneToOne,
-  JoinColumn,
-  OneToMany,
+    Entity,
+    PrimaryGeneratedColumn,
+    CreateDateColumn,
+    UpdateDateColumn,
+    JoinColumn,
+    OneToMany,
+    ManyToOne,
+    JoinTable,
+    ManyToMany,
+    Column,
 } from 'typeorm';
 
 import Customer from '@modules/customers/infra/typeorm/entities/Customer';
 import OrdersProducts from '@modules/orders/infra/typeorm/entities/OrdersProducts';
 
+@Entity({ name: 'orders' })
 class Order {
-  id: string;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
-  customer: Customer;
+    @ManyToOne(() => Customer, {
+        eager: true,
+    })
+    @JoinColumn({ name: 'customer_id' })
+    customer: Customer;
 
-  order_products: OrdersProducts[];
+    @Column()
+    customer_id: string;
 
-  created_at: Date;
+    // @ManyToMany(() => OrdersProducts, {
+    //     cascade: true,
+    // })
+    // @JoinTable({
+    //     name: 'orders_products',
+    //     inverseJoinColumn: { name: 'order_id' },
+    //     joinColumn: { name: 'id' },
+    // })
+    @OneToMany(() => OrdersProducts, order_products => order_products.order, {
+        cascade: true,
+        eager: true,
+    })
+    order_products: OrdersProducts[];
 
-  updated_at: Date;
+    @CreateDateColumn()
+    created_at: Date;
+
+    @UpdateDateColumn()
+    updated_at: Date;
 }
 
 export default Order;
